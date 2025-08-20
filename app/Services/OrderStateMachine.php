@@ -95,6 +95,10 @@ class OrderStateMachine
         $order->status = $newStatus;
         $order->save();
 
+        // Send notification when status changes
+        $notificationService = app(NotificationService::class);
+        $notificationService->sendNotification($order);
+
         return $order;
     }
 

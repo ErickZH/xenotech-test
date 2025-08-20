@@ -20,8 +20,6 @@ class OrderItemResource extends JsonResource
             'quantity' => $this->quantity,
             'price' => $this->price,
             'subtotal' => $this->price * $this->quantity,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ];
     }
 }
