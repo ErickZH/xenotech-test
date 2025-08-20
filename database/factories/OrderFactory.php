@@ -33,4 +33,44 @@ class OrderFactory extends Factory
             'status' => 'pending',
         ]);
     }
+
+    /**
+     * Indicate that the order is processing.
+     */
+    public function processing(): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'processing',
+        ]);
+    }
+
+    /**
+     * Indicate that the order is shipped.
+     */
+    public function shipped(): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'shipped',
+        ]);
+    }
+
+    /**
+     * Indicate that the order is delivered.
+     */
+    public function delivered(): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'delivered',
+        ]);
+    }
+
+    /**
+     * Indicate that the order is cancelled.
+     */
+    public function cancelled(): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'cancelled',
+        ]);
+    }
 }

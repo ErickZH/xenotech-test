@@ -37,7 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
         $exceptions->renderable(function (NotFoundHttpException $e, $request) {
             if ($request->wantsJson() || $request->is('api/*')) {
-                return response()->json(['message' => 'The requested link does not exist'], 400);
+                return response()->json(['message' => 'The requested link does not exist'], 404);
             }
         });
     })->create();
