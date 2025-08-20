@@ -61,7 +61,7 @@ class OrderController extends Controller
             ]);
 
             // Crear los items si existen
-            if (isset($validated['items']) && !empty($validated['items'])) {
+            if (isset($validated['items']) && ! empty($validated['items'])) {
                 $order->items()->createMany($validated['items']);
             }
 
@@ -78,13 +78,14 @@ class OrderController extends Controller
     public function show(Order $order): OrderResource
     {
         $order->load(['items', 'user']);
+
         return new OrderResource($order);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateOrderRequest $request, Order $order): OrderResource | JsonResponse
+    public function update(UpdateOrderRequest $request, Order $order): OrderResource|JsonResponse
     {
         return DB::transaction(function () use ($request, $order) {
             $validated = $request->validated();
@@ -98,7 +99,7 @@ class OrderController extends Controller
                         'message' => 'Error en transición de estado',
                         'error' => $e->getMessage(),
                         'current_status' => $order->status,
-                        'available_transitions' => OrderStateMachine::getAvailableTransitions($order->status)
+                        'available_transitions' => OrderStateMachine::getAvailableTransitions($order->status),
                     ], 422);
                 }
                 // Remover status de validated ya que ya se actualizó
@@ -111,7 +112,7 @@ class OrderController extends Controller
                 'total_amount' => $validated['total_amount'] ?? null,
             ]);
 
-            if (!empty($updateData)) {
+            if (! empty($updateData)) {
                 $order->update($updateData);
             }
 

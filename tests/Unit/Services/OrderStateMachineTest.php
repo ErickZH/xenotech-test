@@ -1,15 +1,12 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\Services;
 
 use App\Services\OrderStateMachine;
-use PHPUnit\Framework\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class OrderStateMachineTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_can_transition_from_pending_to_processing()
     {
         $this->assertTrue(OrderStateMachine::canTransition('pending', 'processing'));

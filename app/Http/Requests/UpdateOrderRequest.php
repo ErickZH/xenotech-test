@@ -28,7 +28,7 @@ class UpdateOrderRequest extends FormRequest
             'status' => [
                 'sometimes',
                 'string',
-                Rule::in(OrderStateMachine::getAllStatuses())
+                Rule::in(OrderStateMachine::getAllStatuses()),
             ],
             'items' => ['sometimes', 'array', 'min:1'],
             'items.*.id' => ['sometimes', 'integer', 'exists:order_items,id'],
@@ -44,7 +44,7 @@ class UpdateOrderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'status.in' => 'El estado debe ser uno de: ' . implode(', ', OrderStateMachine::getAllStatuses()),
+            'status.in' => 'El estado debe ser uno de: '.implode(', ', OrderStateMachine::getAllStatuses()),
         ];
     }
 }

@@ -8,9 +8,13 @@ use InvalidArgumentException;
 class OrderStateMachine
 {
     const STATUS_PENDING = 'pending';
+
     const STATUS_PROCESSING = 'processing';
+
     const STATUS_SHIPPED = 'shipped';
+
     const STATUS_DELIVERED = 'delivered';
+
     const STATUS_CANCELLED = 'cancelled';
 
     /**
@@ -50,7 +54,7 @@ class OrderStateMachine
      */
     public static function canTransition(string $fromStatus, string $toStatus): bool
     {
-        if (!isset(self::$allowedTransitions[$fromStatus])) {
+        if (! isset(self::$allowedTransitions[$fromStatus])) {
             return false;
         }
 
@@ -80,11 +84,11 @@ class OrderStateMachine
     {
         $currentStatus = $order->status;
 
-        if (!self::canTransition($currentStatus, $newStatus)) {
+        if (! self::canTransition($currentStatus, $newStatus)) {
             $availableStates = implode(', ', self::getAvailableTransitions($currentStatus));
             throw new InvalidArgumentException(
-                "No se puede cambiar el estado de '{$currentStatus}' a '{$newStatus}'. " .
-                "Estados disponibles: " . ($availableStates ?: 'ninguno')
+                "No se puede cambiar el estado de '{$currentStatus}' a '{$newStatus}'. ".
+                'Estados disponibles: '.($availableStates ?: 'ninguno')
             );
         }
 
