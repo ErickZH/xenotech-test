@@ -23,8 +23,7 @@ class StoreOrderRequest extends FormRequest
     {
         return [
             'user_id' => ['required', 'integer', 'exists:users,id'],
-            'total_amount' => ['required', 'numeric', 'min:0'],
-            'items' => ['sometimes', 'array', 'min:1'],
+            'items' => ['required', 'array', 'min:1'],
             'items.*.product_name' => ['required_with:items', 'string', 'max:255'],
             'items.*.quantity' => ['required_with:items', 'integer', 'min:1'],
             'items.*.price' => ['required_with:items', 'numeric', 'min:0'],

@@ -17,8 +17,11 @@ class OrderResource extends JsonResource
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
+            'original_amount' => $this->original_amount,
+            'discount_amount' => $this->discount_amount,
             'total_amount' => $this->total_amount,
-            'status' => $this->status,
+            'status' => $this->refresh()->status,
+            'discount_details' => $this->discount_details,
             'items_count' => $this->when($this->relationLoaded('items'), function () {
                 return $this->items->count();
             }),

@@ -13,6 +13,9 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'total_amount',
+        'original_amount',
+        'discount_amount',
+        'discount_details',
         'status',
     ];
 
@@ -20,6 +23,9 @@ class Order extends Model
     {
         return [
             'total_amount' => 'decimal:2',
+            'original_amount' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
+            'discount_details' => 'array',
         ];
     }
 

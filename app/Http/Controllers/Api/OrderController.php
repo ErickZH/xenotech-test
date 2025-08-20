@@ -7,6 +7,7 @@ use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
+use App\Services\OrderDiscountService;
 use App\Services\OrderStateMachine;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,13 @@ use InvalidArgumentException;
 
 class OrderController extends Controller
 {
+    private OrderDiscountService $discountService;
+
+    public function __construct(OrderDiscountService $discountService)
+    {
+        $this->discountService = $discountService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -53,17 +61,28 @@ class OrderController extends Controller
         return DB::transaction(function () use ($request) {
             $validated = $request->validated();
 
-            // Crear la orden
+            // Calcular el precio final con descuentos usando el patrón Decorator
+            $baseAmount = array_reduce($validated['items'], function ($carry, $item) {
+                return $carry + ($item['price'] * $item['quantity']);
+            }, 0);
+
+            $context = [
+                'order_date' => now(),
+                'user_id' => $validated['user_id'],
+            ];
+
+            $discountResult = $this->discountService->calculateFinalAmount($baseAmount, $context);
+
+            // Crear la orden con la información de descuentos
             $order = Order::create([
                 'user_id' => $validated['user_id'],
-                'total_amount' => $validated['total_amount'],
-                'status' => $validated['status'] ?? 'pending',
+                'original_amount' => $discountResult['original_amount'],
+                'discount_amount' => $discountResult['total_discounts'],
+                'total_amount' => $discountResult['final_amount'],
+                'discount_details' => $discountResult['discounts_applied'],
             ]);
 
-            // Crear los items si existen
-            if (isset($validated['items']) && ! empty($validated['items'])) {
-                $order->items()->createMany($validated['items']);
-            }
+            $order->items()->createMany($validated['items']);
 
             // Cargar las relaciones para la respuesta
             $order->load(['items', 'user']);
@@ -91,37 +110,15 @@ class OrderController extends Controller
             $validated = $request->validated();
 
             // Manejar cambio de estado con State Machine
-            if (isset($validated['status']) && $validated['status'] !== $order->status) {
-                try {
-                    OrderStateMachine::transition($order, $validated['status']);
-                } catch (InvalidArgumentException $e) {
-                    return response()->json([
-                        'message' => 'Error en transición de estado',
-                        'error' => $e->getMessage(),
-                        'current_status' => $order->status,
-                        'available_transitions' => OrderStateMachine::getAvailableTransitions($order->status),
-                    ], 422);
-                }
-                // Remover status de validated ya que ya se actualizó
-                unset($validated['status']);
-            }
-
-            // Actualizar otros campos de la orden (excepto status que ya se manejó)
-            $updateData = array_filter([
-                'user_id' => $validated['user_id'] ?? null,
-                'total_amount' => $validated['total_amount'] ?? null,
-            ]);
-
-            if (! empty($updateData)) {
-                $order->update($updateData);
-            }
-
-            // Actualizar items si se proporcionan
-            if (isset($validated['items'])) {
-                // Eliminar items existentes y crear nuevos (simplificado)
-                // En una implementación más sofisticada, se podría manejar updates/deletes individuales
-                $order->items()->delete();
-                $order->items()->createMany($validated['items']);
+            try {
+                OrderStateMachine::transition($order, $validated['status']);
+            } catch (InvalidArgumentException $e) {
+                return response()->json([
+                    'message' => 'Error en transición de estado',
+                    'error' => $e->getMessage(),
+                    'current_status' => $order->status,
+                    'available_transitions' => OrderStateMachine::getAvailableTransitions($order->status),
+                ], 422);
             }
 
             // Cargar las relaciones para la respuesta

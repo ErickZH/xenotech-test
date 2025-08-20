@@ -58,8 +58,6 @@ Crea una nueva orden con sus items.
 ```json
 {
   "user_id": 1,
-  "total_amount": 150.50,
-  "status": "pending", // opcional: pending, processing, shipped, delivered, cancelled
   "items": [ // opcional
     {
       "product_name": "Product 1",
@@ -115,16 +113,7 @@ Actualiza una orden existente.
 #### Request Body:
 ```json
 {
-  "user_id": 1, // opcional
-  "total_amount": 200.00, // opcional
-  "status": "processing", // opcional
-  "items": [ // opcional - reemplaza todos los items existentes
-    {
-      "product_name": "Updated Product",
-      "quantity": 1,
-      "price": 200.00
-    }
-  ]
+  "status": "processing"
 }
 ```
 

@@ -24,17 +24,11 @@ class UpdateOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'total_amount' => ['sometimes', 'numeric', 'min:0'],
             'status' => [
-                'sometimes',
+                'required',
                 'string',
                 Rule::in(OrderStateMachine::getAllStatuses()),
             ],
-            'items' => ['sometimes', 'array', 'min:1'],
-            'items.*.id' => ['sometimes', 'integer', 'exists:order_items,id'],
-            'items.*.product_name' => ['required_with:items', 'string', 'max:255'],
-            'items.*.quantity' => ['required_with:items', 'integer', 'min:1'],
-            'items.*.price' => ['required_with:items', 'numeric', 'min:0'],
         ];
     }
 
