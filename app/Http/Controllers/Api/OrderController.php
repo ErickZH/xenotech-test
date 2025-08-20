@@ -29,7 +29,7 @@ class OrderController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $perPage = $request->get('per_page', 15);
+        $perPage = $request->get('per_page', 10);
         $perPage = min($perPage, 30); // Limitar máximo 30 resultados por página
 
         $query = Order::with(['items', 'user']);

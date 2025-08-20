@@ -23,4 +23,14 @@ class OrderFactory extends Factory
             'status' => fake()->randomElement(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
         ];
     }
+
+    /**
+     * Indicate that the order is pending.
+     */
+    public function pending(): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'pending',
+        ]);
+    }
 }
