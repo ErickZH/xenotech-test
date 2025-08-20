@@ -7,11 +7,12 @@ use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Services\OrderStateMachine;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 
 class OrderController extends Controller
 {
@@ -83,17 +84,36 @@ class OrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateOrderRequest $request, Order $order): OrderResource
+    public function update(UpdateOrderRequest $request, Order $order): OrderResource | JsonResponse
     {
         return DB::transaction(function () use ($request, $order) {
             $validated = $request->validated();
 
-            // Actualizar la orden
-            $order->update(array_filter([
+            // Manejar cambio de estado con State Machine
+            if (isset($validated['status']) && $validated['status'] !== $order->status) {
+                try {
+                    OrderStateMachine::transition($order, $validated['status']);
+                } catch (InvalidArgumentException $e) {
+                    return response()->json([
+                        'message' => 'Error en transición de estado',
+                        'error' => $e->getMessage(),
+                        'current_status' => $order->status,
+                        'available_transitions' => OrderStateMachine::getAvailableTransitions($order->status)
+                    ], 422);
+                }
+                // Remover status de validated ya que ya se actualizó
+                unset($validated['status']);
+            }
+
+            // Actualizar otros campos de la orden (excepto status que ya se manejó)
+            $updateData = array_filter([
                 'user_id' => $validated['user_id'] ?? null,
                 'total_amount' => $validated['total_amount'] ?? null,
-                'status' => $validated['status'] ?? null,
-            ]));
+            ]);
+
+            if (!empty($updateData)) {
+                $order->update($updateData);
+            }
 
             // Actualizar items si se proporcionan
             if (isset($validated['items'])) {

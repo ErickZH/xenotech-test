@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Services\OrderStateMachine;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateOrderRequest extends FormRequest
 {
@@ -23,12 +25,26 @@ class UpdateOrderRequest extends FormRequest
     {
         return [
             'total_amount' => ['sometimes', 'numeric', 'min:0'],
-            'status' => ['sometimes', 'string', 'in:pending,processing,shipped,delivered,cancelled'],
+            'status' => [
+                'sometimes',
+                'string',
+                Rule::in(OrderStateMachine::getAllStatuses())
+            ],
             'items' => ['sometimes', 'array', 'min:1'],
             'items.*.id' => ['sometimes', 'integer', 'exists:order_items,id'],
             'items.*.product_name' => ['required_with:items', 'string', 'max:255'],
             'items.*.quantity' => ['required_with:items', 'integer', 'min:1'],
             'items.*.price' => ['required_with:items', 'numeric', 'min:0'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     */
+    public function messages(): array
+    {
+        return [
+            'status.in' => 'El estado debe ser uno de: ' . implode(', ', OrderStateMachine::getAllStatuses()),
         ];
     }
 }
