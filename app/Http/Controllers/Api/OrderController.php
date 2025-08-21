@@ -30,7 +30,7 @@ class OrderController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $perPage = $request->get('per_page', 10);
-        $perPage = min($perPage, 30); // Limitar máximo 30 resultados por página
+        $perPage = min($perPage, 30);
 
         $query = Order::with(['items', 'user']);
 
@@ -66,12 +66,11 @@ class OrderController extends Controller
                 return $carry + ($item['price'] * $item['quantity']);
             }, 0);
 
-            $context = [
-                'order_date' => now(),
-                'user_id' => $validated['user_id'],
-            ];
-
-            $discountResult = $this->discountService->calculateFinalAmount($baseAmount, $context);
+            $discountResult = $this->discountService->calculateFinalAmount(
+                $baseAmount, [
+                    'order_date' => now(),
+                    'user_id' => $validated['user_id'],
+                ]);
 
             // Crear la orden con la información de descuentos
             $order = Order::create([
@@ -84,7 +83,6 @@ class OrderController extends Controller
 
             $order->items()->createMany($validated['items']);
 
-            // Cargar las relaciones para la respuesta
             $order->load(['items', 'user']);
 
             return new OrderResource($order);

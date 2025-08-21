@@ -1,11 +1,11 @@
 # API Documentation - Orders CRUD
 
 ## Base URL
-`/api`
+`http://localhost:8080/api`
 
 ## Endpoints
 
-### 1. List Orders
+### 1. Listar Ordenes
 **GET** `/api/orders`
 
 Lista todas las órdenes con paginación y filtros opcionales. Incluye automáticamente las relaciones con items y usuario.
@@ -70,7 +70,7 @@ Lista todas las órdenes con paginación y filtros opcionales. Incluye automáti
 }
 ```
 
-### 2. Create Order
+### 2. Crear Orden
 **POST** `/api/orders`
 
 Crea una nueva orden con descuentos automáticos aplicados.
@@ -138,7 +138,7 @@ Crea una nueva orden con descuentos automáticos aplicados.
 }
 ```
 
-### 3. Show Order
+### 3. Ver Orden
 **GET** `/api/orders/{id}`
 
 Obtiene una orden específica con sus items y usuario relacionado.
@@ -174,7 +174,7 @@ Obtiene una orden específica con sus items y usuario relacionado.
 }
 ```
 
-### 4. Update Order Status
+### 4. Actualizar Status de Orden
 **PUT/PATCH** `/api/orders/{id}`
 
 Actualiza el estado de una orden usando State Machine con validación de transiciones. Envía notificaciones automáticamente.
@@ -215,39 +215,26 @@ Actualiza el estado de una orden usando State Machine con validación de transic
 }
 ```
 
-## Validation Rules
+## Reglas de validación
 
-### Store Order (POST):
+### Crear Orden (POST):
 - `user_id`: Requerido
 - `items`: Requerido
 - `items.*.product_name`: Requerido
 - `items.*.quantity`: Requerido
 - `items.*.price`: Requerido
 
-### Update Order (PUT/PATCH):
+### Actualizar status de orden (PUT/PATCH):
 - `status`: Requerido: pending, processing, shipped, delivered, cancelled
 
-## Order State Machine
-
-### Valid Status Transitions:
+### Transiciones validas de cambio de estado:
 - `pending` → `processing`, `cancelled`
 - `processing` → `shipped`, `cancelled`
 - `shipped` → `delivered`, `cancelled`
 - `delivered` → `cancelled`
 - `cancelled` → (ninguno)
 
-### Automatic Features:
-- **Discount Calculation**: Automatically applies available discounts using Decorator pattern
-- **Notifications**: Sends notifications based on user type when status changes
-- **Database Transactions**: Ensures data consistency for all operations
-
-## Discount System
-
-### Available Discounts:
-- **Monday Discount**: Applied on Mondays
-- **Random Discount**: Applied randomly
-
-### Discount Response Structure:
+### Estructura de respuesta de descuentos:
 ```json
 {
   "original_amount": "100.00",
@@ -263,15 +250,15 @@ Actualiza el estado de una orden usando State Machine con validación de transic
 }
 ```
 
-## Notification System
+## Sistema de notificaciones
 
-Notifications are sent automatically when order status changes:
+Las notificaciones se envían automáticamente cuando cambia el estado del pedido:
 
-- **Regular users**: No notifications
-- **Premium users**: Email notifications via webhook
-- **VIP users**: WhatsApp notifications via webhook
+- **Usuario Regular**: Sin notifiación
+- **Usuario Premium**: Notificación por email via webhook
+- **Usuario VIP**: Notificación por WhatsApp via webhook
 
-## Error Responses
+## Respuestas de error
 
 ### Validation Error (422):
 ```json
@@ -301,20 +288,20 @@ Notifications are sent automatically when order status changes:
 }
 ```
 
-## Status Codes
+## HTTP Status Codes
 - `200`: Success
 - `201`: Created
 - `404`: Not Found
 - `422`: Validation Error / Invalid State Transition
 - `500`: Server Error
 
-## Testing Examples
+## Ejemplos de prueba
 
 ### Using cURL:
 
-#### Create Order:
+#### Crear Order:
 ```bash
-curl -X POST http://xenotech-test.test/api/orders \
+curl -X POST http://localhost:8080/api/orders \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   -d '{
@@ -334,21 +321,21 @@ curl -X POST http://xenotech-test.test/api/orders \
   }'
 ```
 
-#### List Orders with Filters:
+#### Listar ordenes con filtros:
 ```bash
-curl -X GET "http://xenotech-test.test/api/orders?per_page=5&status=pending&user_id=1&sort_by=created_at&sort_direction=desc" \
+curl -X GET "http://localhost:8080/api/orders?per_page=5&status=pending&user_id=1&sort_by=created_at&sort_direction=desc" \
   -H "Accept: application/json"
 ```
 
-#### Get Single Order:
+#### Obtener una orden:
 ```bash
-curl -X GET http://xenotech-test.test/api/orders/1 \
+curl -X GET http://localhost:8080/api/orders/1 \
   -H "Accept: application/json"
 ```
 
-#### Update Order Status:
+#### Actualizar status de una orden:
 ```bash
-curl -X PUT http://xenotech-test.test/api/orders/1 \
+curl -X PUT http://localhost:8080/api/orders/1 \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   -d '{
@@ -356,13 +343,13 @@ curl -X PUT http://xenotech-test.test/api/orders/1 \
   }'
 ```
 
-## Features Summary
+## Resumen de características
 
-- ✅ **CRUD Operations**: Complete Create, Read, Update operations
-- ✅ **Automatic Discounts**: Decorator pattern implementation
-- ✅ **State Machine**: Controlled status transitions
-- ✅ **Notifications**: Strategy pattern for different user types
-- ✅ **Database Transactions**: Atomic operations
-- ✅ **Pagination & Filtering**: Flexible querying
-- ✅ **Resource Relationships**: Auto-loaded items and user data
-- ✅ **Comprehensive Validation**: Request validation with custom messages
+- ✅ **Operaciones CRUD**: Operaciones completas de creación, lectura y actualización
+- ✅ **Descuentos automáticos**: Implementación del patrón Decorator
+- ✅ **Máquina de estados**: Transiciones de estado controladas
+- ✅ **Notificaciones**: Patrón de estrategia para diferentes tipos de usuario
+- ✅ **Transacciones de base de datos**: Operaciones atómicas
+- ✅ **Paginación y filtrado**: Consultas flexibles
+- ✅ **Relaciones de recursos**: Carga automática de elementos y datos de usuario
+- ✅ **Validación completa**: Validación de solicitudes con mensajes personalizados
