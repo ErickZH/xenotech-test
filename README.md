@@ -1,5 +1,7 @@
 # Xenotech Prueba Técnica
 
+[![tests](https://github.com/ErickZH/xenotech-test/actions/workflows/tests.yml/badge.svg)](https://github.com/ErickZH/xenotech-test/actions/workflows/tests.yml)
+
 ## Stack
 
 - PHP 8.4
